@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>ElevenLabs Assistant</title>
+  <script src="https://statics.teams.cdn.office.net/sdk/v1.10.0/js/MicrosoftTeams.min.js"></script>
+  <script src="https://alcdn.msauth.net/browser/2.36.0/js/msal-browser.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -14,36 +16,70 @@
       margin-top: 40px;
     }
   </style>
+</head>
+<body>
+  <h2>Welcome to ElevenLabs Assistant</h2>
+  <div id="user-info">Authenticating...</div>
+  <div id="widget"></div>
+
   <script>
-    function getParam(key) {
-      const params = new URLSearchParams(window.location.search);
-      return params.get(key) || '';
+    const msalConfig = {
+      auth: {
+        clientId: "728535b8-e587-4579-abc5-3efe5bbe21f5", // Replace with your Azure AD App Client ID
+        authority: "https://login.microsoftonline.com/common",
+        redirectUri: window.location.href
+      }
+    };
+
+    const msalInstance = new msal.PublicClientApplication(msalConfig);
+
+    async function getUserInfo() {
+      const accounts = msalInstance.getAllAccounts();
+      if (accounts.length === 0) {
+        await msalInstance.loginPopup({ scopes: ["User.Read"] });
+      }
+
+      const result = await msalInstance.acquireTokenSilent({
+        scopes: ["User.Read"],
+        account: msalInstance.getAllAccounts()[0]
+      });
+
+      const res = await fetch("https://graph.microsoft.com/v1.0/me", {
+        headers: {
+          Authorization: `Bearer ${result.accessToken}`
+        }
+      });
+
+      const user = await res.json();
+      return {
+        name: user.displayName,
+        email: user.mail || user.userPrincipalName
+      };
     }
 
-    function loadWidget() {
-      const name = decodeURIComponent(getParam('name'));
-      const email = decodeURIComponent(getParam('email'));
+    async function initApp() {
+      await microsoftTeams.app.initialize();
+
+      const user = await getUserInfo();
+
+      document.getElementById('user-info').innerHTML =
+        `<p>👤 <strong>${user.name}</strong> (${user.email})</p>`;
 
       const widget = document.createElement('elevenlabs-convai');
-      widget.setAttribute('agent-id', 'agent_01jy10kmg5e7ja0mf9xrqv2h60');
-      if (name) widget.setAttribute('data-name', name);
-      if (email) widget.setAttribute('data-email', email);
+      widget.setAttribute('agent-id', 'agent_01jy10kmg5e7ja0mf9xrqv2h60'); // Replace with your actual agent ID
+      widget.setAttribute('data-name', user.name);
+      widget.setAttribute('data-email', user.email);
 
       document.getElementById('widget').appendChild(widget);
 
       const script = document.createElement('script');
-      script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
+      script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed'; // Replace with your actual URL
       script.async = true;
       script.type = 'text/javascript';
       document.body.appendChild(script);
     }
 
-    window.onload = loadWidget;
+    initApp();
   </script>
-</head>
-<body>
-  <h2>Welcome to ElevenLabs Assistant</h2>
-  <p>Loading widget for you...</p>
-  <div id="widget"></div>
 </body>
 </html>
