@@ -21,32 +21,36 @@
   <p>Loading your personalized assistant...</p>
   <div id="widget"></div>
 
-  <script>
-    async function load() {
-      try {
-        await microsoftTeams.app.initialize();
-        const context = await microsoftTeams.app.getContext();
-        
-        const name = encodeURIComponent(context.user.displayName || "Teams User");
-        const email = encodeURIComponent(context.user.userPrincipalName || "");
+ <script>
+  async function load() {
+    try {
+      await microsoftTeams.app.initialize();
+      const context = await microsoftTeams.app.getContext();
 
-        const widget = document.createElement('elevenlabs-convai');
-        widget.setAttribute('agent-id', 'agent_01jy10kmg5e7ja0mf9xrqv2h60'); // Replace with your real agent ID
-        widget.setAttribute('data-name', name);
-        widget.setAttribute('data-email', email);
-        document.getElementById('widget').appendChild(widget);
+      const name = context.user.displayName || "Teams User";
+      const email = context.user.userPrincipalName || "";
 
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed'; // Replace with real script URL
-        script.async = true;
-        document.body.appendChild(script);
-      } catch (error) {
-        document.body.innerHTML = "<p>Unable to load in Microsoft Teams context.</p>";
-        console.error("Teams SDK error:", error);
-      }
+      const dynamicVars = {
+        user_name: name,
+        email: email
+      };
+
+      const widget = document.createElement('elevenlabs-convai');
+      widget.setAttribute('agent-id', 'agent_01jy10kmg5e7ja0mf9xrqv2h60');
+      widget.setAttribute('dynamic-variables', JSON.stringify(dynamicVars));
+      document.getElementById('widget').appendChild(widget);
+
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
+      script.async = true;
+      document.body.appendChild(script);
+    } catch (error) {
+      document.body.innerHTML = "<p>Unable to load in Microsoft Teams context.</p>";
+      console.error("Teams SDK error:", error);
     }
+  }
 
-    window.onload = load;
-  </script>
+  window.onload = load;
+</script>
 </body>
 </html>
