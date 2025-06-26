@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>ElevenLabs Assistant</title>
-  <script src="https://res.cdn.office.net/teams-js/2.0.0/js/MicrosoftTeams.min.js"></script>
+<!--   <script src="https://res.cdn.office.net/teams-js/2.0.0/js/MicrosoftTeams.min.js"></script> -->
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -24,11 +24,11 @@
  <script>
   async function load() {
     try {
-      await microsoftTeams.app.initialize();
-      const context = await microsoftTeams.app.getContext();
+      //await microsoftTeams.app.initialize();
+      //const context = await microsoftTeams.app.getContext();
 
-      const name = context.user.displayName || "Teams User";
-      const email = context.user.userPrincipalName || "";
+      const name = context?.user?.displayName || "Teams User";
+      const email = context?.user?.userPrincipalName || "";
 
       const dynamicVars = {
         name: name,
