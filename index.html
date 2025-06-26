@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>ElevenLabs Assistant</title>
-<!--   <script src="https://res.cdn.office.net/teams-js/2.0.0/js/MicrosoftTeams.min.js"></script> -->
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -21,17 +20,13 @@
   <p>Loading your personalized assistant...</p>
   <div id="widget"></div>
 
- <script>
-  async function load() {
-    try {
-      //await microsoftTeams.app.initialize();
-      //const context = await microsoftTeams.app.getContext();
-
-      const name = context?.user?.displayName || "Teams User";
-      const email = context?.user?.userPrincipalName || "";
+  <script>
+    window.onload = function () {
+      const name = "Test User";
+      const email = "testuser@example.com";
 
       const dynamicVars = {
-        name: name,
+        user_name: name,
         email: email
       };
 
@@ -44,13 +39,7 @@
       script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
       script.async = true;
       document.body.appendChild(script);
-    } catch (error) {
-      document.body.innerHTML = "<p>Unable to load in Microsoft Teams context.</p>";
-      console.error("Teams SDK error:", error);
-    }
-  }
-
-  window.onload = load;
-</script>
+    };
+  </script>
 </body>
 </html>
