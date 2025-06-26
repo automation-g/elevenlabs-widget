@@ -2,8 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>IT HELPDESK</title>
-  <script src="https://res.cdn.office.net/teams-js/2.0.0/js/MicrosoftTeams.min.js"></script>
+  <title>IT HELPDESK – ElevenLabs Assistant</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,7 +10,9 @@
       text-align: center;
       padding: 40px;
     }
-    #widget { margin-top: 30px; }
+    #widget {
+      margin-top: 30px;
+    }
     .info {
       margin-top: 20px;
       font-size: 16px;
@@ -26,49 +27,35 @@
   <div id="widget"></div>
 
   <script>
-    function generateNameFromEmail(email) {
-      const local = email.split('@')[0];
-      const parts = local.split(/[^a-zA-Z0-9]+/);
-      const capped = parts.map(p =>
-        p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()
-      );
-      return capped.join(' ');
+    // Get URL parameters (name and email)
+    function getParam(key) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(key) ? decodeURIComponent(params.get(key)) : '';
     }
 
-    async function load() {
-      try {
-        await microsoftTeams.app.initialize();
-        const context = await microsoftTeams.app.getContext();
+    window.onload = function() {
+      const name = getParam('name') || 'Unknown User';
+      const email = getParam('email') || 'unknown@example.com';
 
-        const email = context.user.userPrincipalName || "";
-        let name = context.user.displayName;
-        if (!name || name === "Teams User") {
-          name = generateNameFromEmail(email);
-        }
+      // Show the values
+      document.getElementById("userInfo").innerHTML = `
+        <strong>Name:</strong> ${name}<br>
+        <strong>Email:</strong> ${email}
+      `;
 
-        document.getElementById("userInfo").innerHTML = `
-          <strong>Name:</strong> ${name} <br>
-          <strong>Email:</strong> ${email}
-        `;
+      // Configure the widget with dynamic variables
+      const dynamicVars = { name, email };
+      const widget = document.createElement('elevenlabs-convai');
+      widget.setAttribute('agent-id', 'agent_01jy10kmg5e7ja0mf9xrqv2h60'); // your agent ID
+      widget.setAttribute('dynamic-variables', JSON.stringify(dynamicVars));
+      document.getElementById('widget').appendChild(widget);
 
-        const dynamicVars = { name, email };
-        const widget = document.createElement('elevenlabs-convai');
-        widget.setAttribute('agent-id', 'agent_01jy10kmg5e7ja0mf9xrqv2h60');
-        widget.setAttribute('dynamic-variables', JSON.stringify(dynamicVars));
-        document.getElementById('widget').appendChild(widget);
-
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
-        script.async = true;
-        document.body.appendChild(script);
-      } catch (error) {
-        document.getElementById("userInfo").innerText =
-          "⚠️ Unable to load inside Microsoft Teams.";
-        console.error("Failed:", error);
-      }
-    }
-
-    window.onload = load;
+      // Load the ElevenLabs embed script
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
+      script.async = true;
+      document.body.appendChild(script);
+    };
   </script>
 </body>
 </html>
