@@ -25,7 +25,253 @@
    <p>24/7 available</p>
   <div class="info" id="userInfo">Retrieving your details…</div>
   <div id="widget"></div>
+  
+<script>
+        // ElevenLabs attribution 
+        function hideElevenLabsAttribution() {
+            let attributionFound = false;
+            let cleanupAttempts = 0;
+            const maxAttempts = 5; // Limit cleanup attempts
 
+            // Function to check and hide elements containing attribution text
+            function hideElementsWithAttribution(container = document) {
+                const elementsToCheck = container.querySelectorAll('*');
+                let hiddenCount = 0;
+                
+                elementsToCheck.forEach(el => {
+                    const text = el.textContent || el.innerText || '';
+                    
+                    // Check for attribution patterns
+                    if (text.includes('Powered by ElevenLabs') || 
+                        text.includes('Powered by Eleven Labs') ||
+                        (text.includes('ElevenLabs') && text.includes('Powered')) ||
+                        text.includes('elevenlabs.io') ||
+                        text.includes('conversational-ai')) {
+                        
+                        attributionFound = true;
+                        
+                        // Hide the element
+                        el.style.display = 'none !important';
+                        el.style.visibility = 'hidden !important';
+                        el.style.opacity = '0 !important';
+                        el.style.height = '0px !important';
+                        el.style.width = '0px !important';
+                        el.style.overflow = 'hidden !important';
+                        
+                        // Also try to hide parent if it only contains attribution
+                        if (el.parentElement && el.parentElement.textContent.trim() === text.trim()) {
+                            el.parentElement.style.display = 'none !important';
+                        }
+                        
+                        hiddenCount++;
+                        console.log('Hidden attribution element:', el, 'Text:', text);
+                    }
+                    
+                    // Hide ElevenLabs attribution links
+                    if (el.tagName === 'A') {
+                        const href = el.href || '';
+                        
+                        if (href.includes('elevenlabs.io') || 
+                            href.includes('conversational-ai')) {
+                            
+                            el.style.display = 'none !important';
+                            el.style.visibility = 'hidden !important';
+                            el.style.opacity = '0 !important';
+                            
+                            hiddenCount++;
+                            attributionFound = true;
+                            console.log('Hidden attribution link:', el, 'Href:', href);
+                        }
+                    }
+                });
+                
+                return hiddenCount;
+            }
+
+            // Function to handle shadow DOM
+            function processShadowDOMs() {
+                const widgets = document.querySelectorAll('elevenlabs-convai, *');
+                
+                widgets.forEach(widget => {
+                    try {
+                        if (widget.shadowRoot) {
+                            // Hide elements in shadow DOM
+                            const hiddenInShadow = hideElementsWithAttribution(widget.shadowRoot);
+                            if (hiddenInShadow > 0) {
+                                attributionFound = true;
+                            }
+                            
+                            // Inject CSS into shadow DOM
+                            let style = widget.shadowRoot.querySelector('#attribution-hider-style');
+                            if (!style) {
+                                style = document.createElement('style');
+                                style.id = 'attribution-hider-style';
+                                style.textContent = `
+                                    /* Hide attribution text */
+                                    p[class*="whitespace-nowrap"] {
+                                        display: none !important;
+                                    }
+                                    *[class*="opacity-30"] {
+                                        display: none !important;
+                                    }
+                                    
+                                    /* Hide attribution links */
+                                    a[href*="elevenlabs"] {
+                                        display: none !important;
+                                    }
+                                    a[href*="conversational-ai"] {
+                                        display: none !important;
+                                    }
+                                    
+                                    /* Hide any remaining attribution containers */
+                                    *:has(a[href*="elevenlabs"]) {
+                                        display: none !important;
+                                    }
+                                `;
+                                widget.shadowRoot.appendChild(style);
+                            }
+                        }
+                    } catch (e) {
+                        console.log('Could not access shadow DOM:', e);
+                    }
+                });
+            }
+
+            // Cleanup function that stops running after success
+            function performCleanup() {
+                cleanupAttempts++;
+                
+                if (cleanupAttempts > maxAttempts) {
+                    console.log('Attribution hider: Max attempts reached, stopping periodic cleanup');
+                    return false; // Stop the interval
+                }
+
+                const hiddenMain = hideElementsWithAttribution();
+                processShadowDOMs();
+
+                // If we found and hid attribution, we can reduce frequency or stop
+                if (attributionFound && hiddenMain === 0) {
+                    console.log('Attribution hider: No new attribution found, reducing cleanup frequency');
+                    return true; // Continue but less frequently
+                }
+
+                return attributionFound; // Continue if we haven't found attribution yet
+            }
+
+            // Initial cleanup
+            performCleanup();
+
+            let observer;
+            let periodicInterval;
+
+            // Set up mutation observer for dynamic content
+            observer = new MutationObserver((mutations) => {
+                let shouldCheck = false;
+                
+                mutations.forEach((mutation) => {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.nodeType === 1) {
+                            shouldCheck = true;
+                        }
+                    });
+                });
+                
+                if (shouldCheck && cleanupAttempts <= maxAttempts) {
+                    setTimeout(() => {
+                        const shouldContinue = performCleanup();
+                        
+                        // If attribution is handled and no new elements, disconnect observer
+                        if (!shouldContinue || (attributionFound && cleanupAttempts > 5)) {
+                            console.log('Attribution hider: Disconnecting mutation observer');
+                            observer.disconnect();
+                            
+                            // Clear periodic interval if running
+                            if (periodicInterval) {
+                                clearInterval(periodicInterval);
+                                console.log('Attribution hider: Stopped periodic cleanup');
+                            }
+                        }
+                    }, 100);
+                }
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+
+            // Periodic cleanup with auto-stop
+            periodicInterval = setInterval(() => {
+                const shouldContinue = performCleanup();
+                
+                if (!shouldContinue || (attributionFound && cleanupAttempts > 5)) {
+                    clearInterval(periodicInterval);
+                    observer.disconnect();
+                    console.log('Attribution hider: All cleanup stopped - attribution handled');
+                }
+            }, 2000);
+
+            console.log('ElevenLabs attribution hider initialized (improved version)');
+        }
+
+        // Enhanced CSS injection
+        function injectGlobalCSS() {
+            // Remove existing style if present
+            const existingStyle = document.getElementById('elevenlabs-attribution-hider');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+
+            const style = document.createElement('style');
+            style.id = 'elevenlabs-attribution-hider';
+            style.textContent = `
+                /* Hide attribution links */
+                a[href*="elevenlabs.io"] {
+                    display: none !important;
+                }
+                
+                a[href*="conversational-ai"] {
+                    display: none !important;
+                }
+                
+                /* Hide attribution containers */
+                p[class*="whitespace-nowrap"] {
+                    display: none !important;
+                }
+                
+                /* Hide containers that only contain attribution */
+                *:has(> a[href*="elevenlabs"]:only-child) {
+                    display: none !important;
+                }
+                
+                /* Additional cleanup for common attribution patterns */
+                .attribution, .powered-by, [class*="attribution"] {
+                    display: none !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Main initialization function
+        function initAttributionHider() {
+            console.log('Initializing ElevenLabs attribution hider (improved version)');
+            injectGlobalCSS();
+            hideElevenLabsAttribution();
+        }
+
+        // Multiple initialization points for reliability
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initAttributionHider);
+        } else {
+            initAttributionHider();
+        }
+
+        // Backup initialization
+        window.addEventListener('load', initAttributionHider);
+        setTimeout(initAttributionHider, 500);
+    </script>
+
+  
   <script>
     // Get URL parameters (name and email)
     function getParam(key) {
