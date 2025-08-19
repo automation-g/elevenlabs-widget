@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Garagash IT Helpdesk Line – Beta</title>
+  <title>Gargash IT Helpdesk Line – Beta</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -22,287 +22,254 @@
 </head>
 <body>
   <h2>Welcome to Gargash IT Helpdesk Assistant</h2>
-   <p>24/7 available</p>
+  <p>24/7 available</p>
   <div class="info" id="userInfo">Retrieving your details…</div>
   <div id="widget"></div>
-  
-<script>
-        // ElevenLabs attribution 
-        function hideElevenLabsAttribution() {
-            let attributionFound = false;
-            let cleanupAttempts = 0;
-            const maxAttempts = 5; // Limit cleanup attempts
 
-            // Function to check and hide elements containing attribution text
-            function hideElementsWithAttribution(container = document) {
-                const elementsToCheck = container.querySelectorAll('*');
-                let hiddenCount = 0;
-                
-                elementsToCheck.forEach(el => {
-                    const text = el.textContent || el.innerText || '';
-                    
-                    // Check for attribution patterns
-                    if (text.includes('Powered by ElevenLabs') || 
-                        text.includes('Powered by Eleven Labs') ||
-                        (text.includes('ElevenLabs') && text.includes('Powered')) ||
-                        text.includes('elevenlabs.io') ||
-                        text.includes('conversational-ai')) {
-                        
-                        attributionFound = true;
-                        
-                        // Hide the element
-                        el.style.display = 'none !important';
-                        el.style.visibility = 'hidden !important';
-                        el.style.opacity = '0 !important';
-                        el.style.height = '0px !important';
-                        el.style.width = '0px !important';
-                        el.style.overflow = 'hidden !important';
-                        
-                        // Also try to hide parent if it only contains attribution
-                        if (el.parentElement && el.parentElement.textContent.trim() === text.trim()) {
-                            el.parentElement.style.display = 'none !important';
-                        }
-                        
-                        hiddenCount++;
-                        console.log('Hidden attribution element:', el, 'Text:', text);
-                    }
-                    
-                    // Hide ElevenLabs attribution links
-                    if (el.tagName === 'A') {
-                        const href = el.href || '';
-                        
-                        if (href.includes('elevenlabs.io') || 
-                            href.includes('conversational-ai')) {
-                            
-                            el.style.display = 'none !important';
-                            el.style.visibility = 'hidden !important';
-                            el.style.opacity = '0 !important';
-                            
-                            hiddenCount++;
-                            attributionFound = true;
-                            console.log('Hidden attribution link:', el, 'Href:', href);
-                        }
-                    }
-                });
-                
-                return hiddenCount;
-            }
+  <!-- Load Microsoft Teams SDK (v2) -->
+  <script src="https://res.cdn.office.net/teams-js/2.13.0/js/MicrosoftTeams.min.js"></script>
 
-            // Function to handle shadow DOM
-            function processShadowDOMs() {
-                const widgets = document.querySelectorAll('elevenlabs-convai, *');
-                
-                widgets.forEach(widget => {
-                    try {
-                        if (widget.shadowRoot) {
-                            // Hide elements in shadow DOM
-                            const hiddenInShadow = hideElementsWithAttribution(widget.shadowRoot);
-                            if (hiddenInShadow > 0) {
-                                attributionFound = true;
-                            }
-                            
-                            // Inject CSS into shadow DOM
-                            let style = widget.shadowRoot.querySelector('#attribution-hider-style');
-                            if (!style) {
-                                style = document.createElement('style');
-                                style.id = 'attribution-hider-style';
-                                style.textContent = `
-                                    /* Hide attribution text */
-                                    p[class*="whitespace-nowrap"] {
-                                        display: none !important;
-                                    }
-                                    *[class*="opacity-30"] {
-                                        display: none !important;
-                                    }
-                                    
-                                    /* Hide attribution links */
-                                    a[href*="elevenlabs"] {
-                                        display: none !important;
-                                    }
-                                    a[href*="conversational-ai"] {
-                                        display: none !important;
-                                    }
-                                    
-                                    /* Hide any remaining attribution containers */
-                                    *:has(a[href*="elevenlabs"]) {
-                                        display: none !important;
-                                    }
-                                `;
-                                widget.shadowRoot.appendChild(style);
-                            }
-                        }
-                    } catch (e) {
-                        console.log('Could not access shadow DOM:', e);
-                    }
-                });
-            }
-
-            // Cleanup function that stops running after success
-            function performCleanup() {
-                cleanupAttempts++;
-                
-                if (cleanupAttempts > maxAttempts) {
-                    console.log('Attribution hider: Max attempts reached, stopping periodic cleanup');
-                    return false; // Stop the interval
-                }
-
-                const hiddenMain = hideElementsWithAttribution();
-                processShadowDOMs();
-
-                // If we found and hid attribution, we can reduce frequency or stop
-                if (attributionFound && hiddenMain === 0) {
-                    console.log('Attribution hider: No new attribution found, reducing cleanup frequency');
-                    return true; // Continue but less frequently
-                }
-
-                return attributionFound; // Continue if we haven't found attribution yet
-            }
-
-            // Initial cleanup
-            performCleanup();
-
-            let observer;
-            let periodicInterval;
-
-            // Set up mutation observer for dynamic content
-            observer = new MutationObserver((mutations) => {
-                let shouldCheck = false;
-                
-                mutations.forEach((mutation) => {
-                    mutation.addedNodes.forEach((node) => {
-                        if (node.nodeType === 1) {
-                            shouldCheck = true;
-                        }
-                    });
-                });
-                
-                if (shouldCheck && cleanupAttempts <= maxAttempts) {
-                    setTimeout(() => {
-                        const shouldContinue = performCleanup();
-                        
-                        // If attribution is handled and no new elements, disconnect observer
-                        if (!shouldContinue || (attributionFound && cleanupAttempts > 5)) {
-                            console.log('Attribution hider: Disconnecting mutation observer');
-                            observer.disconnect();
-                            
-                            // Clear periodic interval if running
-                            if (periodicInterval) {
-                                clearInterval(periodicInterval);
-                                console.log('Attribution hider: Stopped periodic cleanup');
-                            }
-                        }
-                    }, 100);
-                }
-            });
-
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
-
-            // Periodic cleanup with auto-stop
-            periodicInterval = setInterval(() => {
-                const shouldContinue = performCleanup();
-                
-                if (!shouldContinue || (attributionFound && cleanupAttempts > 5)) {
-                    clearInterval(periodicInterval);
-                    observer.disconnect();
-                    console.log('Attribution hider: All cleanup stopped - attribution handled');
-                }
-            }, 2000);
-
-            console.log('ElevenLabs attribution hider initialized (improved version)');
-        }
-
-        // Enhanced CSS injection
-        function injectGlobalCSS() {
-            // Remove existing style if present
-            const existingStyle = document.getElementById('elevenlabs-attribution-hider');
-            if (existingStyle) {
-                existingStyle.remove();
-            }
-
-            const style = document.createElement('style');
-            style.id = 'elevenlabs-attribution-hider';
-            style.textContent = `
-                /* Hide attribution links */
-                a[href*="elevenlabs.io"] {
-                    display: none !important;
-                }
-                
-                a[href*="conversational-ai"] {
-                    display: none !important;
-                }
-                
-                /* Hide attribution containers */
-                p[class*="whitespace-nowrap"] {
-                    display: none !important;
-                }
-                
-                /* Hide containers that only contain attribution */
-                *:has(> a[href*="elevenlabs"]:only-child) {
-                    display: none !important;
-                }
-                
-                /* Additional cleanup for common attribution patterns */
-                .attribution, .powered-by, [class*="attribution"] {
-                    display: none !important;
-                }
-            `;
-            document.head.appendChild(style);
-        }
-
-        // Main initialization function
-        function initAttributionHider() {
-            console.log('Initializing ElevenLabs attribution hider (improved version)');
-            injectGlobalCSS();
-            hideElevenLabsAttribution();
-        }
-
-        // Multiple initialization points for reliability
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initAttributionHider);
-        } else {
-            initAttributionHider();
-        }
-
-        // Backup initialization
-        window.addEventListener('load', initAttributionHider);
-        setTimeout(initAttributionHider, 500);
-    </script>
-
-  
+  <!-- Your ElevenLabs attribution hider (unchanged) -->
   <script>
-    // Get URL parameters (name and email)
-    function getParam(key) {
-      const params = new URLSearchParams(window.location.search);
-      return params.get(key) ? decodeURIComponent(params.get(key)) : '';
+    // ElevenLabs attribution 
+    function hideElevenLabsAttribution() {
+      let attributionFound = false;
+      let cleanupAttempts = 0;
+      const maxAttempts = 5; // Limit cleanup attempts
+
+      function hideElementsWithAttribution(container = document) {
+        const elementsToCheck = container.querySelectorAll('*');
+        let hiddenCount = 0;
+
+        elementsToCheck.forEach(el => {
+          const text = el.textContent || el.innerText || '';
+          if (text.includes('Powered by ElevenLabs') || 
+              text.includes('Powered by Eleven Labs') ||
+              (text.includes('ElevenLabs') && text.includes('Powered')) ||
+              text.includes('elevenlabs.io') ||
+              text.includes('conversational-ai')) {
+
+            attributionFound = true;
+            el.style.display = 'none !important';
+            el.style.visibility = 'hidden !important';
+            el.style.opacity = '0 !important';
+            el.style.height = '0px !important';
+            el.style.width = '0px !important';
+            el.style.overflow = 'hidden !important';
+
+            if (el.parentElement && el.parentElement.textContent.trim() === text.trim()) {
+              el.parentElement.style.display = 'none !important';
+            }
+
+            hiddenCount++;
+          }
+
+          if (el.tagName === 'A') {
+            const href = el.href || '';
+            if (href.includes('elevenlabs.io') || href.includes('conversational-ai')) {
+              el.style.display = 'none !important';
+              el.style.visibility = 'hidden !important';
+              el.style.opacity = '0 !important';
+              hiddenCount++;
+              attributionFound = true;
+            }
+          }
+        });
+
+        return hiddenCount;
+      }
+
+      function processShadowDOMs() {
+        const widgets = document.querySelectorAll('elevenlabs-convai, *');
+        widgets.forEach(widget => {
+          try {
+            if (widget.shadowRoot) {
+              const hiddenInShadow = hideElementsWithAttribution(widget.shadowRoot);
+              if (hiddenInShadow > 0) attributionFound = true;
+
+              let style = widget.shadowRoot.querySelector('#attribution-hider-style');
+              if (!style) {
+                style = document.createElement('style');
+                style.id = 'attribution-hider-style';
+                style.textContent = `
+                  p[class*="whitespace-nowrap"] { display: none !important; }
+                  *[class*="opacity-30"] { display: none !important; }
+                  a[href*="elevenlabs"] { display: none !important; }
+                  a[href*="conversational-ai"] { display: none !important; }
+                  *:has(a[href*="elevenlabs"]) { display: none !important; }
+                `;
+                widget.shadowRoot.appendChild(style);
+              }
+            }
+          } catch (e) {
+            console.log('Could not access shadow DOM:', e);
+          }
+        });
+      }
+
+      function performCleanup() {
+        cleanupAttempts++;
+        if (cleanupAttempts > maxAttempts) {
+          console.log('Attribution hider: Max attempts reached, stopping periodic cleanup');
+          return false;
+        }
+
+        const hiddenMain = hideElementsWithAttribution();
+        processShadowDOMs();
+
+        if (attributionFound && hiddenMain === 0) {
+          console.log('Attribution hider: No new attribution found, reducing cleanup frequency');
+          return true;
+        }
+        return attributionFound;
+      }
+
+      performCleanup();
+
+      let observer;
+      let periodicInterval;
+
+      observer = new MutationObserver((mutations) => {
+        let shouldCheck = false;
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === 1) shouldCheck = true;
+          });
+        });
+
+        if (shouldCheck && cleanupAttempts <= maxAttempts) {
+          setTimeout(() => {
+            const shouldContinue = performCleanup();
+            if (!shouldContinue || (attributionFound && cleanupAttempts > 5)) {
+              console.log('Attribution hider: Disconnecting mutation observer');
+              observer.disconnect();
+              if (periodicInterval) {
+                clearInterval(periodicInterval);
+                console.log('Attribution hider: Stopped periodic cleanup');
+              }
+            }
+          }, 100);
+        }
+      });
+
+      observer.observe(document.body, { childList: true, subtree: true });
+
+      periodicInterval = setInterval(() => {
+        const shouldContinue = performCleanup();
+        if (!shouldContinue || (attributionFound && cleanupAttempts > 5)) {
+          clearInterval(periodicInterval);
+          observer.disconnect();
+          console.log('Attribution hider: All cleanup stopped - attribution handled');
+        }
+      }, 2000);
+
+      console.log('ElevenLabs attribution hider initialized (improved version)');
     }
 
-    window.onload = function() {
-      const name = getParam('name') || 'Unknown User';
-      const email = getParam('email') || 'unknown@example.com';
+    function injectGlobalCSS() {
+      const existingStyle = document.getElementById('elevenlabs-attribution-hider');
+      if (existingStyle) existingStyle.remove();
 
-      // Show the values
-      document.getElementById("userInfo").innerHTML = `
-        <strong>Name:</strong> ${name}<br>
-        <strong>Email:</strong> ${email}
+      const style = document.createElement('style');
+      style.id = 'elevenlabs-attribution-hider';
+      style.textContent = `
+        a[href*="elevenlabs.io"], a[href*="conversational-ai"] { display: none !important; }
+        p[class*="whitespace-nowrap"] { display: none !important; }
+        *:has(> a[href*="elevenlabs"]:only-child) { display: none !important; }
+        .attribution, .powered-by, [class*="attribution"] { display: none !important; }
       `;
+      document.head.appendChild(style);
+    }
 
-      // Configure the widget with dynamic variables
-      const dynamicVars = { name, email };
+    function initAttributionHider() {
+      console.log('Initializing ElevenLabs attribution hider (improved version)');
+      injectGlobalCSS();
+      hideElevenLabsAttribution();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAttributionHider);
+    } else {
+      initAttributionHider();
+    }
+    window.addEventListener('load', initAttributionHider);
+    setTimeout(initAttributionHider, 500);
+  </script>
+
+  <!-- Teams-aware identity + email->name derivation -->
+  <script>
+    // Build a nice display name from the email local-part
+    function nameFromEmail(email) {
+      if (!email) return 'Unknown User';
+      const local = email.split('@')[0].split('+')[0]; // before @, strip +alias
+      const parts = local
+        .split(/[._-]+/).filter(Boolean)               // split on common separators
+        .map(p => p.replace(/\d+/g, ''))               // remove digits inside words
+        .filter(Boolean)
+        .map(p => p.charAt(0).toUpperCase() + p.slice(1));
+      return parts.join(' ') || 'Unknown User';
+    }
+
+    // Decode JWT payload to read simple claims without extra libs
+    function decodeJwt(token) {
+      try {
+        const b = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+        const s = decodeURIComponent(atob(b).split('').map(c => '%' + ('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        return JSON.parse(s);
+      } catch { return {}; }
+    }
+
+    // Get email from Teams (context), fallback to SSO token claims, then URL ?email=
+    async function getEmail() {
+      // 1) Teams context
+      try {
+        await microsoftTeams.app.initialize();
+        const ctx = await microsoftTeams.app.getContext();
+        if (ctx?.user?.userPrincipalName) return ctx.user.userPrincipalName;
+      } catch (e) {
+        console.debug('Teams context not available or not in Teams:', e);
+      }
+
+      // 2) SSO token claim (preferred_username or upn)
+      try {
+        const token = await microsoftTeams.authentication.getAuthToken();
+        const claims = decodeJwt(token);
+        const claimEmail = claims.preferred_username || claims.upn;
+        if (claimEmail) return claimEmail;
+      } catch (e) {
+        console.debug('No SSO token/claims available:', e);
+      }
+
+      // 3) Outside Teams: use URL parameter if provided
+      const params = new URLSearchParams(location.search);
+      return params.get('email') || 'unknown@example.com';
+    }
+
+    async function initFromTeamsEmail() {
+      const email = await getEmail();
+      const name  = nameFromEmail(email);
+
+      // Show values
+      const info = document.getElementById('userInfo');
+      if (info) {
+        info.innerHTML = `<strong>Name:</strong> ${name}<br><strong>Email:</strong> ${email}`;
+      }
+
+      // Inject ElevenLabs widget with dynamic variables
       const widget = document.createElement('elevenlabs-convai');
-      widget.setAttribute('agent-id', 'agent_01jy10kmg5e7ja0mf9xrqv2h60'); // your agent ID
-      widget.setAttribute('dynamic-variables', JSON.stringify(dynamicVars));
+      widget.setAttribute('agent-id', 'agent_8701k29sm9ewfkc99cv4ygrj7ypr'); // your agent ID
+      widget.setAttribute('dynamic-variables', JSON.stringify({ name, email }));
       document.getElementById('widget').appendChild(widget);
 
-      // Load the ElevenLabs embed script
+      // Load the ElevenLabs embed script once
       const script = document.createElement('script');
       script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
       script.async = true;
       document.body.appendChild(script);
-    };
+    }
+
+    // Run after page load (does not clobber other onload handlers)
+    window.addEventListener('load', initFromTeamsEmail);
   </script>
 </body>
 </html>
-
