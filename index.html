@@ -38,7 +38,7 @@
         // Get Teams context (includes user info)
         const context = await microsoftTeams.app.getContext();
 
-        const name = context.user?.userDisplayName || "Unknown User";
+        const name = context.user?.DisplayName || "Unknown User";
         const email = context.user?.userPrincipalName || "unknown@example.com";
 
         // Show the values on the page
@@ -72,3 +72,4 @@
   </script>
 </body>
 </html>
+
