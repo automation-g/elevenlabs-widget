@@ -2,17 +2,25 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Gargash IT Helpdesk Line – Beta</title>
+  <title>Purple Assistant – BETA</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f0f0f0;
-      text-align: center;
+      text-align: left;   /* all text left by default */
       padding: 40px;
     }
+
+    h2 {
+      text-align: left;   /* keep title left too (remove this if you want centered) */
+    }
+
     #widget {
+      display: flex;
+      justify-content: flex-end;  /* widget goes to the right */
       margin-top: 30px;
     }
+
     .info {
       margin-top: 20px;
       font-size: 16px;
@@ -21,21 +29,21 @@
   </style>
 </head>
 <body>
-  <h2>Welcome to Gargash IT Helpdesk Assistant</h2>
-  <p>24/7 available</p>
+  <h2>Welcome to Purple Assistant - BETA</h2>
+  <p>Available 24/7</p>
   <div class="info" id="userInfo">Retrieving your details…</div>
   <div id="widget"></div>
 
   <!-- Load Microsoft Teams SDK (v2) -->
   <script src="https://res.cdn.office.net/teams-js/2.13.0/js/MicrosoftTeams.min.js"></script>
 
-  <!-- Your ElevenLabs attribution hider (unchanged) -->
+  <!-- Attribution hider (unchanged) -->
   <script>
-    // ElevenLabs attribution 
+    // ElevenLabs attribution hider (same as before)
     function hideElevenLabsAttribution() {
       let attributionFound = false;
       let cleanupAttempts = 0;
-      const maxAttempts = 5; // Limit cleanup attempts
+      const maxAttempts = 5;
 
       function hideElementsWithAttribution(container = document) {
         const elementsToCheck = container.querySelectorAll('*');
@@ -50,15 +58,15 @@
               text.includes('conversational-ai')) {
 
             attributionFound = true;
-            el.style.display = 'none !important';
-            el.style.visibility = 'hidden !important';
-            el.style.opacity = '0 !important';
-            el.style.height = '0px !important';
-            el.style.width = '0px !important';
-            el.style.overflow = 'hidden !important';
+            el.style.display = 'none';
+            el.style.visibility = 'hidden';
+            el.style.opacity = '0';
+            el.style.height = '0px';
+            el.style.width = '0px';
+            el.style.overflow = 'hidden';
 
             if (el.parentElement && el.parentElement.textContent.trim() === text.trim()) {
-              el.parentElement.style.display = 'none !important';
+              el.parentElement.style.display = 'none';
             }
 
             hiddenCount++;
@@ -67,9 +75,9 @@
           if (el.tagName === 'A') {
             const href = el.href || '';
             if (href.includes('elevenlabs.io') || href.includes('conversational-ai')) {
-              el.style.display = 'none !important';
-              el.style.visibility = 'hidden !important';
-              el.style.opacity = '0 !important';
+              el.style.display = 'none';
+              el.style.visibility = 'hidden';
+              el.style.opacity = '0';
               hiddenCount++;
               attributionFound = true;
             }
@@ -84,8 +92,7 @@
         widgets.forEach(widget => {
           try {
             if (widget.shadowRoot) {
-              const hiddenInShadow = hideElementsWithAttribution(widget.shadowRoot);
-              if (hiddenInShadow > 0) attributionFound = true;
+              hideElementsWithAttribution(widget.shadowRoot);
 
               let style = widget.shadowRoot.querySelector('#attribution-hider-style');
               if (!style) {
@@ -109,69 +116,23 @@
 
       function performCleanup() {
         cleanupAttempts++;
-        if (cleanupAttempts > maxAttempts) {
-          console.log('Attribution hider: Max attempts reached, stopping periodic cleanup');
-          return false;
-        }
+        if (cleanupAttempts > maxAttempts) return false;
 
-        const hiddenMain = hideElementsWithAttribution();
+        hideElementsWithAttribution();
         processShadowDOMs();
 
-        if (attributionFound && hiddenMain === 0) {
-          console.log('Attribution hider: No new attribution found, reducing cleanup frequency');
-          return true;
-        }
         return attributionFound;
       }
 
       performCleanup();
-
-      let observer;
-      let periodicInterval;
-
-      observer = new MutationObserver((mutations) => {
-        let shouldCheck = false;
-        mutations.forEach((mutation) => {
-          mutation.addedNodes.forEach((node) => {
-            if (node.nodeType === 1) shouldCheck = true;
-          });
-        });
-
-        if (shouldCheck && cleanupAttempts <= maxAttempts) {
-          setTimeout(() => {
-            const shouldContinue = performCleanup();
-            if (!shouldContinue || (attributionFound && cleanupAttempts > 5)) {
-              console.log('Attribution hider: Disconnecting mutation observer');
-              observer.disconnect();
-              if (periodicInterval) {
-                clearInterval(periodicInterval);
-                console.log('Attribution hider: Stopped periodic cleanup');
-              }
-            }
-          }, 100);
-        }
-      });
-
+      let observer = new MutationObserver(() => performCleanup());
       observer.observe(document.body, { childList: true, subtree: true });
 
-      periodicInterval = setInterval(() => {
-        const shouldContinue = performCleanup();
-        if (!shouldContinue || (attributionFound && cleanupAttempts > 5)) {
-          clearInterval(periodicInterval);
-          observer.disconnect();
-          console.log('Attribution hider: All cleanup stopped - attribution handled');
-        }
-      }, 2000);
-
-      console.log('ElevenLabs attribution hider initialized (improved version)');
+      setInterval(performCleanup, 2000);
     }
 
     function injectGlobalCSS() {
-      const existingStyle = document.getElementById('elevenlabs-attribution-hider');
-      if (existingStyle) existingStyle.remove();
-
       const style = document.createElement('style');
-      style.id = 'elevenlabs-attribution-hider';
       style.textContent = `
         a[href*="elevenlabs.io"], a[href*="conversational-ai"] { display: none !important; }
         p[class*="whitespace-nowrap"] { display: none !important; }
@@ -182,35 +143,25 @@
     }
 
     function initAttributionHider() {
-      console.log('Initializing ElevenLabs attribution hider (improved version)');
       injectGlobalCSS();
       hideElevenLabsAttribution();
     }
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initAttributionHider);
-    } else {
-      initAttributionHider();
-    }
     window.addEventListener('load', initAttributionHider);
-    setTimeout(initAttributionHider, 500);
   </script>
 
-  <!-- Teams-aware identity + email->name derivation -->
+  <!-- Teams-aware identity + widget injection -->
   <script>
-    // Build a nice display name from the email local-part
     function nameFromEmail(email) {
       if (!email) return 'Unknown User';
-      const local = email.split('@')[0].split('+')[0]; // before @, strip +alias
-      const parts = local
-        .split(/[._-]+/).filter(Boolean)               // split on common separators
-        .map(p => p.replace(/\d+/g, ''))               // remove digits inside words
+      const local = email.split('@')[0].split('+')[0];
+      const parts = local.split(/[._-]+/).filter(Boolean)
+        .map(p => p.replace(/\d+/g, ''))
         .filter(Boolean)
         .map(p => p.charAt(0).toUpperCase() + p.slice(1));
       return parts.join(' ') || 'Unknown User';
     }
 
-    // Decode JWT payload to read simple claims without extra libs
     function decodeJwt(token) {
       try {
         const b = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
@@ -219,28 +170,17 @@
       } catch { return {}; }
     }
 
-    // Get email from Teams (context), fallback to SSO token claims, then URL ?email=
     async function getEmail() {
-      // 1) Teams context
       try {
         await microsoftTeams.app.initialize();
         const ctx = await microsoftTeams.app.getContext();
         if (ctx?.user?.userPrincipalName) return ctx.user.userPrincipalName;
-      } catch (e) {
-        console.debug('Teams context not available or not in Teams:', e);
-      }
-
-      // 2) SSO token claim (preferred_username or upn)
+      } catch {}
       try {
         const token = await microsoftTeams.authentication.getAuthToken();
         const claims = decodeJwt(token);
-        const claimEmail = claims.preferred_username || claims.upn;
-        if (claimEmail) return claimEmail;
-      } catch (e) {
-        console.debug('No SSO token/claims available:', e);
-      }
-
-      // 3) Outside Teams: use URL parameter if provided
+        return claims.preferred_username || claims.upn;
+      } catch {}
       const params = new URLSearchParams(location.search);
       return params.get('email') || 'unknown@example.com';
     }
@@ -249,28 +189,23 @@
       const email = await getEmail();
       const name  = nameFromEmail(email);
 
-      // Show values
       const info = document.getElementById('userInfo');
       if (info) {
         info.innerHTML = `<strong>Name:</strong> ${name}<br><strong>Email:</strong> ${email}`;
       }
 
-      // Inject ElevenLabs widget with dynamic variables
       const widget = document.createElement('elevenlabs-convai');
-      widget.setAttribute('agent-id', 'agent_4901k3gjds1eexs83j5a7pv4xaaz'); // your agent ID
+      widget.setAttribute('agent-id', 'agent_4901k3gjds1eexs83j5a7pv4xaaz');
       widget.setAttribute('dynamic-variables', JSON.stringify({ name, email }));
       document.getElementById('widget').appendChild(widget);
 
-      // Load the ElevenLabs embed script once
       const script = document.createElement('script');
       script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
       script.async = true;
       document.body.appendChild(script);
     }
 
-    // Run after page load (does not clobber other onload handlers)
     window.addEventListener('load', initFromTeamsEmail);
   </script>
 </body>
 </html>
-
