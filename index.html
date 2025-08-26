@@ -2,28 +2,37 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Gargash IT Helpdesk Line – Beta</title>
+  <title>Purple Assistant BETA</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f0f0f0;
-      text-align: center;
       padding: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .left-content {
+      text-align: left;
+      flex: 1;
     }
     #widget {
-      margin-top: 30px;
+      margin-left: 30px;
     }
     .info {
       margin-top: 20px;
       font-size: 16px;
       color: #333;
+      text-align: left;
     }
   </style>
 </head>
 <body>
-  <h2>Welcome to Gargash IT Helpdesk Assistant</h2>
-  <p>24/7 available</p>
-  <div class="info" id="userInfo">Retrieving your details…</div>
+  <div class="left-content">
+    <h2>Welcome to Purple Assistant BETA</h2>
+    <p>24/7 available</p>
+    <div class="info" id="userInfo">Retrieving your details…</div>
+  </div>
   <div id="widget"></div>
 
   <!-- Load Microsoft Teams SDK (v2) -->
