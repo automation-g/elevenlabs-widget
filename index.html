@@ -39,7 +39,7 @@
 
     .container {
       max-width: 800px;
-      margin: 0 auto;
+      margin: 0;
       margin-bottom: 100px; /* Keep bottom area free for chat widget */
     }
 
@@ -104,9 +104,9 @@
 
     #userInfo {
       background: var(--accent);
-      padding: 15ulgid;
-      border-radius: 6px;
+      padding: 15px;
       border-left: 3px solid var(--header-accent);
+      text-align: left;
     }
 
     .loading {
@@ -164,6 +164,13 @@
       <div class="info-title">User Information</div>
       <div id="userInfo">
         <div class="loading">Retrieving your details...</div>
+      </div>
+    </div>
+
+    <div class="info-section" style="margin-top: 20px;">
+      <div class="info-title">How to Get Started</div>
+      <div style="color: var(--text); line-height: 1.5;">
+        Click the widget in the bottom-right corner to initiate a conversation and get assistance with your questions.
       </div>
     </div>
   </div>
