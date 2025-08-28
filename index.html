@@ -1,284 +1,316 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Purple Assistant BETA</title>
+  
   <style>
+    /* Color scheme */
+    :root {
+      --header: #532E79;
+      --header-accent: #B98330;
+      --business: #6B4490;
+      --application: #8B6BB1;
+      --data: #A590C5;
+      --technology: #C5B3D8;
+      --customer360: #B98330;
+      --financial: #D4A556;
+      --shared: #9B7EBD;
+      --integration: #8B5FA8;
+      --text: #2c2c2c;
+      --white: #ffffff;
+      --light-bg: #f8f6fa;
+      --accent: #E8DCEF;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f0f0f0;
-      padding: 40px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--light-bg);
+      padding: 20px;
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      margin-bottom: 100px; /* Keep bottom area free for chat widget */
+    }
+
+    .header-section {
+      background: var(--white);
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      border-top: 4px solid var(--header);
+    }
+
+    h1 {
+      color: var(--header);
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .beta-badge {
+      display: inline-block;
+      background: var(--header-accent);
+      color: var(--white);
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+
+    .status {
+      color: var(--integration);
+      font-size: 14px;
+      margin-top: 8px;
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
+      gap: 8px;
     }
-    .left-content {
-      text-align: left;
-      flex: 1;
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #4ade80;
+      border-radius: 50%;
+      display: inline-block;
     }
-    #widget {
-      margin-left: 30px;
+
+    .info-section {
+      background: var(--white);
+      border-radius: 8px;
+      padding: 25px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-    .info {
-      margin-top: 20px;
+
+    .info-title {
+      color: var(--business);
       font-size: 16px;
-      color: #333;
-      text-align: left;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
+    #userInfo {
+      background: var(--accent);
+      padding: 15ulgid;
+      border-radius: 6px;
+      border-left: 3px solid var(--header-accent);
+    }
+
+    .loading {
+      color: var(--shared);
+      font-style: italic;
+    }
+
+    .user-field {
+      margin: 8px 0;
+      color: var(--text);
+    }
+
+    .field-label {
+      font-weight: 600;
+      color: var(--business);
+      display: inline-block;
+      min-width: 60px;
+    }
+
+    .field-value {
+      color: var(--text);
+    }
+
+    /* Widget positioning - bottom right */
+    #widget {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    /* Hide ElevenLabs attribution */
+    a[href*="elevenlabs"],
+    p[class*="whitespace-nowrap"],
+    [class*="attribution"],
+    [class*="powered"] {
+      display: none !important;
     }
   </style>
 </head>
 <body>
-  <div class="left-content">
-    <h2>Welcome to Purple Assistant BETA</h2>
-    <p>24/7 available</p>
-    <div class="info" id="userInfo">Retrieving your details…</div>
+  <div class="container">
+    <div class="header-section">
+      <h1>
+        Purple Assistant
+        <span class="beta-badge">BETA</span>
+      </h1>
+      <div class="status">
+        <span class="status-dot"></span>
+        <span>Available 24/7</span>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <div class="info-title">User Information</div>
+      <div id="userInfo">
+        <div class="loading">Retrieving your details...</div>
+      </div>
+    </div>
   </div>
+
+  <!-- Widget container (bottom right) -->
   <div id="widget"></div>
 
-  <!-- Load Microsoft Teams SDK (v2) -->
+  <!-- Microsoft Teams SDK -->
   <script src="https://res.cdn.office.net/teams-js/2.13.0/js/MicrosoftTeams.min.js"></script>
 
-  <!-- Your ElevenLabs attribution hider (unchanged) -->
   <script>
-    // ElevenLabs attribution 
-    function hideElevenLabsAttribution() {
-      let attributionFound = false;
-      let cleanupAttempts = 0;
-      const maxAttempts = 5; // Limit cleanup attempts
+    // Configuration
+    const AGENT_ID = 'agent_4901k3gjds1eexs83j5a7pv4xaaz';
 
-      function hideElementsWithAttribution(container = document) {
-        const elementsToCheck = container.querySelectorAll('*');
-        let hiddenCount = 0;
-
-        elementsToCheck.forEach(el => {
-          const text = el.textContent || el.innerText || '';
-          if (text.includes('Powered by ElevenLabs') || 
-              text.includes('Powered by Eleven Labs') ||
-              (text.includes('ElevenLabs') && text.includes('Powered')) ||
-              text.includes('elevenlabs.io') ||
-              text.includes('conversational-ai')) {
-
-            attributionFound = true;
-            el.style.display = 'none !important';
-            el.style.visibility = 'hidden !important';
-            el.style.opacity = '0 !important';
-            el.style.height = '0px !important';
-            el.style.width = '0px !important';
-            el.style.overflow = 'hidden !important';
-
-            if (el.parentElement && el.parentElement.textContent.trim() === text.trim()) {
-              el.parentElement.style.display = 'none !important';
-            }
-
-            hiddenCount++;
-          }
-
-          if (el.tagName === 'A') {
-            const href = el.href || '';
-            if (href.includes('elevenlabs.io') || href.includes('conversational-ai')) {
-              el.style.display = 'none !important';
-              el.style.visibility = 'hidden !important';
-              el.style.opacity = '0 !important';
-              hiddenCount++;
-              attributionFound = true;
-            }
-          }
-        });
-
-        return hiddenCount;
-      }
-
-      function processShadowDOMs() {
-        const widgets = document.querySelectorAll('elevenlabs-convai, *');
-        widgets.forEach(widget => {
-          try {
-            if (widget.shadowRoot) {
-              const hiddenInShadow = hideElementsWithAttribution(widget.shadowRoot);
-              if (hiddenInShadow > 0) attributionFound = true;
-
-              let style = widget.shadowRoot.querySelector('#attribution-hider-style');
-              if (!style) {
-                style = document.createElement('style');
-                style.id = 'attribution-hider-style';
-                style.textContent = `
-                  p[class*="whitespace-nowrap"] { display: none !important; }
-                  *[class*="opacity-30"] { display: none !important; }
-                  a[href*="elevenlabs"] { display: none !important; }
-                  a[href*="conversational-ai"] { display: none !important; }
-                  *:has(a[href*="elevenlabs"]) { display: none !important; }
-                `;
-                widget.shadowRoot.appendChild(style);
-              }
-            }
-          } catch (e) {
-            console.log('Could not access shadow DOM:', e);
-          }
-        });
-      }
-
-      function performCleanup() {
-        cleanupAttempts++;
-        if (cleanupAttempts > maxAttempts) {
-          console.log('Attribution hider: Max attempts reached, stopping periodic cleanup');
-          return false;
-        }
-
-        const hiddenMain = hideElementsWithAttribution();
-        processShadowDOMs();
-
-        if (attributionFound && hiddenMain === 0) {
-          console.log('Attribution hider: No new attribution found, reducing cleanup frequency');
-          return true;
-        }
-        return attributionFound;
-      }
-
-      performCleanup();
-
-      let observer;
-      let periodicInterval;
-
-      observer = new MutationObserver((mutations) => {
-        let shouldCheck = false;
-        mutations.forEach((mutation) => {
-          mutation.addedNodes.forEach((node) => {
-            if (node.nodeType === 1) shouldCheck = true;
-          });
-        });
-
-        if (shouldCheck && cleanupAttempts <= maxAttempts) {
-          setTimeout(() => {
-            const shouldContinue = performCleanup();
-            if (!shouldContinue || (attributionFound && cleanupAttempts > 5)) {
-              console.log('Attribution hider: Disconnecting mutation observer');
-              observer.disconnect();
-              if (periodicInterval) {
-                clearInterval(periodicInterval);
-                console.log('Attribution hider: Stopped periodic cleanup');
-              }
-            }
-          }, 100);
-        }
-      });
-
-      observer.observe(document.body, { childList: true, subtree: true });
-
-      periodicInterval = setInterval(() => {
-        const shouldContinue = performCleanup();
-        if (!shouldContinue || (attributionFound && cleanupAttempts > 5)) {
-          clearInterval(periodicInterval);
-          observer.disconnect();
-          console.log('Attribution hider: All cleanup stopped - attribution handled');
-        }
-      }, 2000);
-
-      console.log('ElevenLabs attribution hider initialized (improved version)');
-    }
-
-    function injectGlobalCSS() {
-      const existingStyle = document.getElementById('elevenlabs-attribution-hider');
-      if (existingStyle) existingStyle.remove();
-
+    // Hide ElevenLabs attribution
+    function hideAttribution() {
       const style = document.createElement('style');
-      style.id = 'elevenlabs-attribution-hider';
       style.textContent = `
-        a[href*="elevenlabs.io"], a[href*="conversational-ai"] { display: none !important; }
-        p[class*="whitespace-nowrap"] { display: none !important; }
-        *:has(> a[href*="elevenlabs"]:only-child) { display: none !important; }
-        .attribution, .powered-by, [class*="attribution"] { display: none !important; }
+        a[href*="elevenlabs"],
+        a[href*="conversational-ai"],
+        p[class*="whitespace-nowrap"],
+        *[class*="opacity-30"],
+        [class*="attribution"],
+        [class*="powered"],
+        *:has(> a[href*="elevenlabs"]:only-child) {
+          display: none !important;
+          visibility: hidden !important;
+        }
       `;
       document.head.appendChild(style);
+
+      // Check for shadow DOM elements periodically
+      let checks = 0;
+      const interval = setInterval(() => {
+        checks++;
+        const widgets = document.querySelectorAll('elevenlabs-convai');
+        widgets.forEach(widget => {
+          if (widget.shadowRoot) {
+            const shadowStyle = document.createElement('style');
+            shadowStyle.textContent = style.textContent;
+            widget.shadowRoot.appendChild(shadowStyle);
+          }
+        });
+        
+        // Stop after 10 checks
+        if (checks > 10) clearInterval(interval);
+      }, 1000);
     }
 
-    function initAttributionHider() {
-      console.log('Initializing ElevenLabs attribution hider (improved version)');
-      injectGlobalCSS();
-      hideElevenLabsAttribution();
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initAttributionHider);
-    } else {
-      initAttributionHider();
-    }
-    window.addEventListener('load', initAttributionHider);
-    setTimeout(initAttributionHider, 500);
-  </script>
-
-  <!-- Teams-aware identity + email->name derivation -->
-  <script>
-    // Build a nice display name from the email local-part
+    // Extract name from email
     function nameFromEmail(email) {
       if (!email) return 'Unknown User';
-      const local = email.split('@')[0].split('+')[0]; // before @, strip +alias
+      const local = email.split('@')[0].split('+')[0];
       const parts = local
-        .split(/[._-]+/).filter(Boolean)               // split on common separators
-        .map(p => p.replace(/\d+/g, ''))               // remove digits inside words
+        .split(/[._-]+/)
+        .filter(Boolean)
+        .map(p => p.replace(/\d+/g, ''))
         .filter(Boolean)
         .map(p => p.charAt(0).toUpperCase() + p.slice(1));
       return parts.join(' ') || 'Unknown User';
     }
 
-    // Decode JWT payload to read simple claims without extra libs
+    // Decode JWT token
     function decodeJwt(token) {
       try {
-        const b = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
-        const s = decodeURIComponent(atob(b).split('').map(c => '%' + ('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-        return JSON.parse(s);
-      } catch { return {}; }
+        const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const jsonStr = decodeURIComponent(
+          atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
+        );
+        return JSON.parse(jsonStr);
+      } catch {
+        return {};
+      }
     }
 
-    // Get email from Teams (context), fallback to SSO token claims, then URL ?email=
-    async function getEmail() {
-      // 1) Teams context
+    // Get user email from Teams or URL
+    async function getUserEmail() {
+      // Try Teams context
       try {
         await microsoftTeams.app.initialize();
-        const ctx = await microsoftTeams.app.getContext();
-        if (ctx?.user?.userPrincipalName) return ctx.user.userPrincipalName;
+        const context = await microsoftTeams.app.getContext();
+        if (context?.user?.userPrincipalName) {
+          return context.user.userPrincipalName;
+        }
       } catch (e) {
-        console.debug('Teams context not available or not in Teams:', e);
+        console.debug('Not in Teams context');
       }
 
-      // 2) SSO token claim (preferred_username or upn)
+      // Try SSO token
       try {
         const token = await microsoftTeams.authentication.getAuthToken();
         const claims = decodeJwt(token);
-        const claimEmail = claims.preferred_username || claims.upn;
-        if (claimEmail) return claimEmail;
+        if (claims.preferred_username || claims.upn) {
+          return claims.preferred_username || claims.upn;
+        }
       } catch (e) {
-        console.debug('No SSO token/claims available:', e);
+        console.debug('No SSO token available');
       }
 
-      // 3) Outside Teams: use URL parameter if provided
-      const params = new URLSearchParams(location.search);
+      // Fallback to URL parameter
+      const params = new URLSearchParams(window.location.search);
       return params.get('email') || 'unknown@example.com';
     }
 
-    async function initFromTeamsEmail() {
-      const email = await getEmail();
-      const name  = nameFromEmail(email);
+    // Initialize the application
+    async function init() {
+      // Get user info
+      const email = await getUserEmail();
+      const name = nameFromEmail(email);
 
-      // Show values
-      const info = document.getElementById('userInfo');
-      if (info) {
-        info.innerHTML = `<strong>Name:</strong> ${name}<br><strong>Email:</strong> ${email}`;
+      // Update UI
+      const userInfo = document.getElementById('userInfo');
+      if (userInfo) {
+        userInfo.innerHTML = `
+          <div class="user-field">
+            <span class="field-label">Name:</span>
+            <span class="field-value">${name}</span>
+          </div>
+          <div class="user-field">
+            <span class="field-label">Email:</span>
+            <span class="field-value">${email}</span>
+          </div>
+        `;
       }
 
-      // Inject ElevenLabs widget with dynamic variables
+      // Create ElevenLabs widget
       const widget = document.createElement('elevenlabs-convai');
-      widget.setAttribute('agent-id', 'agent_4901k3gjds1eexs83j5a7pv4xaaz'); // your agent ID
+      widget.setAttribute('agent-id', AGENT_ID);
       widget.setAttribute('dynamic-variables', JSON.stringify({ name, email }));
       document.getElementById('widget').appendChild(widget);
 
-      // Load the ElevenLabs embed script once
+      // Load ElevenLabs script
       const script = document.createElement('script');
       script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
       script.async = true;
       document.body.appendChild(script);
+
+      // Start hiding attribution
+      hideAttribution();
     }
 
-    // Run after page load (does not clobber other onload handlers)
-    window.addEventListener('load', initFromTeamsEmail);
+    // Start when page is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
   </script>
 </body>
 </html>
