@@ -361,8 +361,8 @@
       let userInfo = await getUserFromGraph();
       let dataSourceDetails = '';
       
-      // Fallback to email-based approach if Graph API fails
-      if (!userInfo || userInfo.error) {
+      // Fallback to email-based approach if Graph API fails completely (returns null)
+      if (!userInfo) {
         const email = await getUserEmail();
         userInfo = {
           name: nameFromEmail(email),
