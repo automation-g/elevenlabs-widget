@@ -359,15 +359,21 @@
     async function init() {
       // Try to get user info from Graph API first
       let userInfo = await getUserFromGraph();
-      let dataSourceDetails = '';
+      let graphApiError = null;
       
-      // Fallback to email-based approach if Graph API fails completely (returns null)
-      if (!userInfo) {
+      // Check if Graph API failed and preserve error info
+      if (!userInfo || userInfo.error) {
+        if (userInfo && userInfo.error) {
+          graphApiError = userInfo.error;
+        }
+        
+        // Use fallback method for user data
         const email = await getUserEmail();
         userInfo = {
           name: nameFromEmail(email),
           email: email,
-          source: 'Fallback (Teams Context/URL)'
+          source: 'Fallback (Teams Context/URL)',
+          graphApiError: graphApiError
         };
       }
 
@@ -412,11 +418,12 @@
           `;
         }
 
-        if (userInfo.error) {
+        if (userInfo.error || userInfo.graphApiError) {
+          const errorToShow = userInfo.error || userInfo.graphApiError;
           sourceContent += `
             <div class="user-field" style="color: red;">
-              <span class="field-label">Error:</span>
-              <span class="field-value">${userInfo.error}</span>
+              <span class="field-label">Graph API Error:</span>
+              <span class="field-value">${errorToShow}</span>
             </div>
           `;
         }
