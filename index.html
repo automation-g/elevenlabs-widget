@@ -284,12 +284,42 @@
               department: user.department
             }
           };
+        } else {
+          // Handle HTTP error responses
+          let errorDetails = `HTTP ${response.status}: ${response.statusText}`;
+          try {
+            const errorBody = await response.json();
+            if (errorBody.error) {
+              errorDetails += ` - ${errorBody.error.code}: ${errorBody.error.message}`;
+            }
+          } catch (parseError) {
+            // If we can't parse the error response, just use the status
+          }
+          
+          console.debug('Graph API HTTP error:', errorDetails);
+          return {
+            source: 'Graph API Failed',
+            error: errorDetails,
+            name: 'Graph API Error',
+            email: 'unknown@example.com'
+          };
         }
       } catch (e) {
         console.debug('Graph API call failed:', e);
+        let errorMessage = e.message || 'Unknown error';
+        
+        // Add more specific error context
+        if (e.name === 'TypeError' && e.message.includes('fetch')) {
+          errorMessage = 'Network error - unable to reach Graph API';
+        } else if (e.message.includes('getAuthToken')) {
+          errorMessage = 'Authentication error - unable to get token';
+        }
+        
         return {
           source: 'Graph API Failed',
-          error: e.message || 'Unknown error'
+          error: errorMessage,
+          name: 'Graph API Error',
+          email: 'unknown@example.com'
         };
       }
       
