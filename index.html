@@ -168,6 +168,13 @@
     </div>
 
     <div class="info-section" style="margin-top: 20px;">
+      <div class="info-title">Data Source Information</div>
+      <div id="dataSourceInfo">
+        <div class="loading">Checking data sources...</div>
+      </div>
+    </div>
+
+    <div class="info-section" style="margin-top: 20px;">
       <div class="info-title">How to Get Started</div>
       <div style="color: var(--text); line-height: 1.5;">
         Click the widget in the bottom-right corner to initiate a conversation and get assistance with your questions.
@@ -265,11 +272,25 @@
           const user = await response.json();
           return {
             name: user.displayName || 'Unknown User',
-            email: user.userPrincipalName || user.mail || 'unknown@example.com'
+            email: user.userPrincipalName || user.mail || 'unknown@example.com',
+            source: 'Microsoft Graph API',
+            rawData: {
+              displayName: user.displayName,
+              userPrincipalName: user.userPrincipalName,
+              mail: user.mail,
+              givenName: user.givenName,
+              surname: user.surname,
+              jobTitle: user.jobTitle,
+              department: user.department
+            }
           };
         }
       } catch (e) {
         console.debug('Graph API call failed:', e);
+        return {
+          source: 'Graph API Failed',
+          error: e.message || 'Unknown error'
+        };
       }
       
       return null;
@@ -308,17 +329,19 @@
     async function init() {
       // Try to get user info from Graph API first
       let userInfo = await getUserFromGraph();
+      let dataSourceDetails = '';
       
       // Fallback to email-based approach if Graph API fails
-      if (!userInfo) {
+      if (!userInfo || userInfo.error) {
         const email = await getUserEmail();
         userInfo = {
           name: nameFromEmail(email),
-          email: email
+          email: email,
+          source: 'Fallback (Teams Context/URL)'
         };
       }
 
-      // Update UI
+      // Update User Information UI
       const userInfoElement = document.getElementById('userInfo');
       if (userInfoElement) {
         userInfoElement.innerHTML = `
@@ -331,6 +354,44 @@
             <span class="field-value">${userInfo.email}</span>
           </div>
         `;
+      }
+
+      // Update Data Source Information UI
+      const dataSourceElement = document.getElementById('dataSourceInfo');
+      if (dataSourceElement) {
+        let sourceContent = `
+          <div class="user-field">
+            <span class="field-label">Source:</span>
+            <span class="field-value" style="color: ${userInfo.source === 'Microsoft Graph API' ? 'green' : 'orange'};">
+              ${userInfo.source}
+            </span>
+          </div>
+        `;
+
+        if (userInfo.rawData) {
+          sourceContent += `
+            <div class="user-field" style="margin-top: 10px;">
+              <span class="field-label">Graph Data:</span>
+            </div>
+            <div style="margin-left: 20px; font-size: 12px; color: var(--shared);">
+              ${Object.entries(userInfo.rawData)
+                .filter(([key, value]) => value !== null && value !== undefined && value !== '')
+                .map(([key, value]) => `<div><strong>${key}:</strong> ${value}</div>`)
+                .join('')}
+            </div>
+          `;
+        }
+
+        if (userInfo.error) {
+          sourceContent += `
+            <div class="user-field" style="color: red;">
+              <span class="field-label">Error:</span>
+              <span class="field-value">${userInfo.error}</span>
+            </div>
+          `;
+        }
+
+        dataSourceElement.innerHTML = sourceContent;
       }
 
       // Create ElevenLabs widget
