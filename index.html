@@ -175,6 +175,13 @@
     </div>
 
     <div class="info-section" style="margin-top: 20px;">
+      <div class="info-title">Teams Context Debug</div>
+      <div id="teamsDebugInfo">
+        <div class="loading">Loading Teams context details...</div>
+      </div>
+    </div>
+
+    <div class="info-section" style="margin-top: 20px;">
       <div class="info-title">Samanage Data</div>
       <div id="samanageInfo">
         <div class="loading">Loading Samanage information...</div>
@@ -416,7 +423,7 @@
         
         // Provide more specific error messages
         if (e.name === 'TypeError' && e.message.includes('fetch')) {
-          errorMessage = 'CORS/Network error - browser blocked request to Samanage API';
+          errorMessage = 'Teams security policy blocked request to Samanage API. This is common in embedded Teams apps - external API calls may need to be proxied through your backend or added to validDomains in app manifest.';
         } else if (e.message.includes('NetworkError')) {
           errorMessage = 'Network error - unable to reach Samanage API';
         }
@@ -442,17 +449,25 @@
       try {
         await microsoftTeams.app.initialize();
         const context = await microsoftTeams.app.getContext();
+        console.log('Full Teams context:', context);
+        console.log('User object:', context?.user);
+        
         if (context?.user?.userPrincipalName) {
           return {
             name: context.user.displayName || nameFromEmail(context.user.userPrincipalName),
             email: context.user.userPrincipalName,
             source: 'Teams Context',
             teamsData: {
+              // Core user data
               displayName: context.user.displayName,
               userPrincipalName: context.user.userPrincipalName,
               id: context.user.id,
               preferredLanguage: context.user.preferredLanguage,
-              // Additional Teams context data
+              // Additional user fields that might be available
+              givenName: context.user.givenName,
+              surname: context.user.surname,
+              email: context.user.email,
+              // Tenant context
               tenantId: context.user.tenant?.id,
               tenantDisplayName: context.user.tenant?.displayName,
               // App context
@@ -470,7 +485,13 @@
               channelDisplayName: context.channel?.displayName,
               channelType: context.channel?.membershipType,
               // Meeting context if available
-              meetingId: context.meeting?.id
+              meetingId: context.meeting?.id,
+              // Debug: show all available user properties
+              allUserProperties: Object.keys(context.user || {}),
+              // Debug: raw user object (first 5 properties)
+              rawUserSample: Object.fromEntries(
+                Object.entries(context.user || {}).slice(0, 10)
+              )
             }
           };
         }
@@ -611,6 +632,53 @@
         }
 
         dataSourceElement.innerHTML = sourceContent;
+      }
+
+      // Display complete Teams context for debugging
+      const teamsDebugElement = document.getElementById('teamsDebugInfo');
+      if (teamsDebugElement && userInfo.teamsData) {
+        let debugContent = `
+          <div class="user-field">
+            <span class="field-label">Available Properties:</span>
+            <span class="field-value">${userInfo.teamsData.allUserProperties?.join(', ') || 'None'}</span>
+          </div>
+        `;
+
+        if (userInfo.teamsData.rawUserSample) {
+          debugContent += `
+            <div class="user-field" style="margin-top: 10px;">
+              <span class="field-label">Raw User Data Sample:</span>
+            </div>
+            <div style="margin-left: 20px; font-size: 11px; color: var(--shared); background: var(--accent); padding: 10px; border-radius: 4px;">
+              ${Object.entries(userInfo.teamsData.rawUserSample)
+                .map(([key, value]) => `<div><strong>${key}:</strong> ${value || '[undefined]'}</div>`)
+                .join('')}
+            </div>
+          `;
+        }
+
+        // Show specific name-related fields
+        debugContent += `
+          <div class="user-field" style="margin-top: 10px;">
+            <span class="field-label">Name Fields:</span>
+          </div>
+          <div style="margin-left: 20px; font-size: 11px; color: var(--shared); background: var(--accent); padding: 10px; border-radius: 4px;">
+            <div><strong>displayName:</strong> ${userInfo.teamsData.displayName || '[undefined]'}</div>
+            <div><strong>givenName:</strong> ${userInfo.teamsData.givenName || '[undefined]'}</div>
+            <div><strong>surname:</strong> ${userInfo.teamsData.surname || '[undefined]'}</div>
+            <div><strong>email:</strong> ${userInfo.teamsData.email || '[undefined]'}</div>
+            <div><strong>userPrincipalName:</strong> ${userInfo.teamsData.userPrincipalName || '[undefined]'}</div>
+          </div>
+        `;
+
+        teamsDebugElement.innerHTML = debugContent;
+      } else if (teamsDebugElement) {
+        teamsDebugElement.innerHTML = `
+          <div class="user-field">
+            <span class="field-label">Status:</span>
+            <span class="field-value" style="color: orange;">No Teams context data available</span>
+          </div>
+        `;
       }
 
       // Get Samanage information using the dynamically fetched email
