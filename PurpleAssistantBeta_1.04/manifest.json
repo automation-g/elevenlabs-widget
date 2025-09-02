@@ -45,7 +45,9 @@
     ],
     "permissions": [
     "identity",
-    "messageTeamMembers"
+    "messageTeamMembers",
+    "User.Read", 
+    "User.ReadBasic.All"
     ],
     "devicePermissions": [
      "media"
@@ -53,7 +55,8 @@
     "validDomains": [
         "automation-g.github.io",
         "unpkg.com",
-        "api.samanage.com"
+        "api.samanage.com",
+        "*.supabase.co"
     ],
     "authorization": {
         "permissions": {
