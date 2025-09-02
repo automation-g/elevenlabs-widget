@@ -269,10 +269,16 @@
     }
 
     // Generate fresh token using client credentials flow
+    // SECURITY NOTE: Client secrets should NOT be embedded in client-side code
+    // This function is disabled for security. Implement server-side proxy instead.
     async function generateFreshToken() {
-      const tenantId = '31c06606-c23c-4881-8914-439ef1a8a645';
-      const clientId = 'd6e0f9db-ede1-47ae-8b48-7ac65aac032a';
-      const clientSecret = 'Buh8Q~YhjtaGADnB6Jt3z.DZCwlIW1SLdtpeCbff';
+      console.error('Graph API client credentials disabled for security - implement server-side proxy');
+      return null;
+      
+      // TODO: Replace with secure server-side implementation
+      // const tenantId = 'YOUR_TENANT_ID';
+      // const clientId = 'YOUR_CLIENT_ID';  
+      // const clientSecret = 'YOUR_CLIENT_SECRET'; // NEVER expose in client code!
 
       const tokenUrl = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`;
       const params = new URLSearchParams();
