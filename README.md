@@ -12,10 +12,10 @@ To securely deploy this application, you need to configure GitHub repository sec
 2. Add the following **Repository secrets**:
 
 ```
-AZURE_TENANT_ID=31c06606-c23c-4881-8914-439ef1a8a645
-AZURE_CLIENT_ID=d6e0f9db-ede1-47ae-8b48-7ac65aac032a
-AZURE_CLIENT_SECRET=Buh8Q~YhjtaGADnB6Jt3z.DZCwlIW1SLdtpeCbff
-ELEVENLABS_AGENT_ID=agent_4901k3gjds1eexs83j5a7pv4xaaz
+AZURE_TENANT_ID=xxx
+AZURE_CLIENT_ID=xxx
+AZURE_CLIENT_SECRET=xxx
+ELEVENLABS_AGENT_ID=xxx
 ```
 
 ### 2. Local Development
@@ -38,21 +38,31 @@ The application automatically deploys to GitHub Pages when you push to the `main
 
 - **Single HTML file** with embedded CSS and JavaScript
 - **Teams SDK integration** for context and user information
-- **Microsoft Graph API** for rich user profile data
-- **ElevenLabs widget** for conversational AI
-- **Secure credential management** via GitHub secrets
+- **Microsoft Graph API** for rich user profile data using client credentials flow
+- **ElevenLabs conversational AI widget** for intelligent chat assistance
+- **Secure credential management** via GitHub secrets and environment variables
+- **Automated deployment** with GitHub Actions
 
 ## 📦 Teams App Versions
 
-- **v1.02** - Original with basic SSO
-- **v1.03** - Added Samanage API support
-- **v1.04** - Fixed Graph API manifest issues
-- **v1.05** - Removed SSO complications
-- **v1.06** - Clean version without external dependencies
+- **v1.02** - Original with basic SSO authentication
+- **v1.03** - Added Samanage API integration support
+- **v1.04** - Fixed Graph API manifest configuration issues
+- **v1.05** - Removed problematic SSO complications
+- **v1.06** - Clean version focused on core Teams functionality
 
-## 🔒 Security
+## 🔒 Security Best Practices
 
-- Client credentials are injected at build time via GitHub Actions
-- No secrets are committed to the repository
-- Environment variables provide secure configuration
-- Production deployment uses GitHub secrets
+- **No secrets in repository** - All credentials managed through GitHub secrets
+- **Build-time injection** - Secrets replaced during GitHub Actions deployment
+- **Environment variable support** - Local development uses `.env` files (git-ignored)
+- **Validation checks** - Application validates configuration before execution
+- **Secure by default** - Placeholder system prevents accidental credential exposure
+
+## 🚀 Features
+
+- **Rich user context** - Extracts user information from Teams context and Graph API
+- **App version display** - Shows current Teams app manifest version for debugging
+- **Comprehensive error handling** - Graceful fallbacks when APIs fail
+- **Debug information** - Detailed context data for troubleshooting
+- **Responsive design** - Works seamlessly within Microsoft Teams interface

@@ -1,0 +1,94 @@
+# This workflow clones the default GitHub Pages build and deployment workflow
+# with added secret injection capabilities
+
+name: pages-build-deployment
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Build job - clones the default Pages build process
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+      
+    - name: Inject secrets (Custom Enhancement)
+      run: |
+        echo "🔧 Injecting secrets into application files..."
+        
+        # Replace placeholders with actual secrets from GitHub repository secrets  
+        sed -i "s/__AZURE_TENANT_ID__/${{ secrets.AZURE_TENANT_ID }}/g" index.html
+        sed -i "s/__AZURE_CLIENT_ID__/${{ secrets.AZURE_CLIENT_ID }}/g" index.html
+        sed -i "s/__AZURE_CLIENT_SECRET__/${{ secrets.AZURE_CLIENT_SECRET }}/g" index.html
+        sed -i "s/__ELEVENLABS_AGENT_ID__/${{ secrets.ELEVENLABS_AGENT_ID }}/g" index.html
+        
+        echo "✅ Secret injection completed"
+        
+        # Verify all placeholders were replaced (security check)
+        echo "🔍 Verifying secret injection..."
+        MISSING_SECRETS=0
+        
+        if grep -q "__AZURE_TENANT_ID__" index.html; then
+          echo "❌ AZURE_TENANT_ID not replaced - check repository secrets"
+          MISSING_SECRETS=1
+        fi
+        
+        if grep -q "__AZURE_CLIENT_ID__" index.html; then
+          echo "❌ AZURE_CLIENT_ID not replaced - check repository secrets"  
+          MISSING_SECRETS=1
+        fi
+        
+        if grep -q "__AZURE_CLIENT_SECRET__" index.html; then
+          echo "❌ AZURE_CLIENT_SECRET not replaced - check repository secrets"
+          MISSING_SECRETS=1
+        fi
+        
+        if grep -q "__ELEVENLABS_AGENT_ID__" index.html; then
+          echo "❌ ELEVENLABS_AGENT_ID not replaced - check repository secrets"
+          MISSING_SECRETS=1
+        fi
+        
+        if [ $MISSING_SECRETS -eq 0 ]; then
+          echo "✅ All secrets successfully injected"
+        else
+          echo "❌ Some secrets are missing - deployment may fail"
+          echo "📝 Please add missing secrets in GitHub repository settings"
+          exit 1
+        fi
+        
+    - name: Build with Jekyll (Default Pages Behavior)
+      uses: actions/jekyll-build-pages@v1
+      with:
+        source: ./
+        destination: ./_site
+        
+    - name: Upload artifact (Default Pages Behavior) 
+      uses: actions/upload-pages-artifact@v3
+
+  # Deploy job - exactly like default Pages deployment
+  deploy:
+    environment:
+      name: github-pages  
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
