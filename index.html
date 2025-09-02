@@ -793,134 +793,134 @@
       }
 
       // Get Samanage information using the dynamically fetched email
-      const samanageResult = await getUserFromSamanage(userInfo.email);
+      // const samanageResult = await getUserFromSamanage(userInfo.email);
       let requesterId = null;
       
-      const samanageElement = document.getElementById('samanageInfo');
-      if (samanageElement) {
-        let samanageContent = '';
+      // const samanageElement = document.getElementById('samanageInfo');
+      // if (samanageElement) {
+      //   let samanageContent = '';
         
-        if (samanageResult.success && samanageResult.data && samanageResult.data.length > 0) {
-          const requesterData = samanageResult.data[0];
-          requesterId = requesterData.id;
+      //   if (samanageResult.success && samanageResult.data && samanageResult.data.length > 0) {
+      //     const requesterData = samanageResult.data[0];
+      //     requesterId = requesterData.id;
           
-          samanageContent = `
-            <div class="user-field">
-              <span class="field-label">Status:</span>
-              <span class="field-value" style="color: green;">Found in Samanage</span>
-            </div>
-            <div class="user-field">
-              <span class="field-label">ID:</span>
-              <span class="field-value">${requesterData.id || 'N/A'}</span>
-            </div>
-            <div class="user-field">
-              <span class="field-label">Name:</span>
-              <span class="field-value">${requesterData.name || 'N/A'}</span>
-            </div>
-            <div class="user-field">
-              <span class="field-label">Email:</span>
-              <span class="field-value">${requesterData.email || 'N/A'}</span>
-            </div>
-            <div class="user-field">
-              <span class="field-label">Phone:</span>
-              <span class="field-value">${requesterData.phone || 'N/A'}</span>
-            </div>
-            <div class="user-field">
-              <span class="field-label">Mobile:</span>
-              <span class="field-value">${requesterData.mobile_phone || 'N/A'}</span>
-            </div>
-            <div class="user-field">
-              <span class="field-label">Department:</span>
-              <span class="field-value">${requesterData.department || 'N/A'}</span>
-            </div>
-            <div class="user-field">
-              <span class="field-label">Title:</span>
-              <span class="field-value">${requesterData.title || 'N/A'}</span>
-            </div>
-            <div class="user-field">
-              <span class="field-label">Language:</span>
-              <span class="field-value">${requesterData.language || 'N/A'}</span>
-            </div>
-          `;
-        } else if (samanageResult.success && samanageResult.data && samanageResult.data.length === 0) {
-          samanageContent = `
-            <div class="user-field">
-              <span class="field-label">Status:</span>
-              <span class="field-value" style="color: orange;">No records found in Samanage</span>
-            </div>
-            <div class="user-field">
-              <span class="field-label">Email:</span>
-              <span class="field-value">${userInfo.email}</span>
-            </div>
-          `;
-        } else {
-          samanageContent = `
-            <div class="user-field">
-              <span class="field-label">Status:</span>
-              <span class="field-value" style="color: red;">Failed to connect to Samanage</span>
-            </div>
-            <div class="user-field">
-              <span class="field-label">Error:</span>
-              <span class="field-value">${samanageResult.error}</span>
-            </div>
-          `;
-        }
+      //     samanageContent = `
+      //       <div class="user-field">
+      //         <span class="field-label">Status:</span>
+      //         <span class="field-value" style="color: green;">Found in Samanage</span>
+      //       </div>
+      //       <div class="user-field">
+      //         <span class="field-label">ID:</span>
+      //         <span class="field-value">${requesterData.id || 'N/A'}</span>
+      //       </div>
+      //       <div class="user-field">
+      //         <span class="field-label">Name:</span>
+      //         <span class="field-value">${requesterData.name || 'N/A'}</span>
+      //       </div>
+      //       <div class="user-field">
+      //         <span class="field-label">Email:</span>
+      //         <span class="field-value">${requesterData.email || 'N/A'}</span>
+      //       </div>
+      //       <div class="user-field">
+      //         <span class="field-label">Phone:</span>
+      //         <span class="field-value">${requesterData.phone || 'N/A'}</span>
+      //       </div>
+      //       <div class="user-field">
+      //         <span class="field-label">Mobile:</span>
+      //         <span class="field-value">${requesterData.mobile_phone || 'N/A'}</span>
+      //       </div>
+      //       <div class="user-field">
+      //         <span class="field-label">Department:</span>
+      //         <span class="field-value">${requesterData.department || 'N/A'}</span>
+      //       </div>
+      //       <div class="user-field">
+      //         <span class="field-label">Title:</span>
+      //         <span class="field-value">${requesterData.title || 'N/A'}</span>
+      //       </div>
+      //       <div class="user-field">
+      //         <span class="field-label">Language:</span>
+      //         <span class="field-value">${requesterData.language || 'N/A'}</span>
+      //       </div>
+      //     `;
+      //   } else if (samanageResult.success && samanageResult.data && samanageResult.data.length === 0) {
+      //     samanageContent = `
+      //       <div class="user-field">
+      //         <span class="field-label">Status:</span>
+      //         <span class="field-value" style="color: orange;">No records found in Samanage</span>
+      //       </div>
+      //       <div class="user-field">
+      //         <span class="field-label">Email:</span>
+      //         <span class="field-value">${userInfo.email}</span>
+      //       </div>
+      //     `;
+      //   } else {
+      //     samanageContent = `
+      //       <div class="user-field">
+      //         <span class="field-label">Status:</span>
+      //         <span class="field-value" style="color: red;">Failed to connect to Samanage</span>
+      //       </div>
+      //       <div class="user-field">
+      //         <span class="field-label">Error:</span>
+      //         <span class="field-value">${samanageResult.error}</span>
+      //       </div>
+      //     `;
+      //   }
 
-        // Add detailed debugging information
-        if (samanageResult.requestDetails) {
-          samanageContent += `
-            <div class="user-field" style="margin-top: 15px;">
-              <span class="field-label">Request Details:</span>
-            </div>
-            <div style="margin-left: 20px; font-size: 11px; color: var(--shared); background: var(--accent); padding: 10px; border-radius: 4px;">
-              <div><strong>URL:</strong> ${samanageResult.requestDetails.url}</div>
-              <div><strong>Method:</strong> ${samanageResult.requestDetails.method}</div>
-              <div><strong>Timestamp:</strong> ${samanageResult.requestDetails.timestamp}</div>
-              <div style="margin-top: 8px;"><strong>Headers:</strong></div>
-              ${Object.entries(samanageResult.requestDetails.headers)
-                .map(([key, value]) => `<div style="margin-left: 10px;">${key}: ${key.includes('Authorization') ? '[REDACTED]' : value}</div>`)
-                .join('')}
-            </div>
-          `;
-        }
+      //   // Add detailed debugging information
+      //   if (samanageResult.requestDetails) {
+      //     samanageContent += `
+      //       <div class="user-field" style="margin-top: 15px;">
+      //         <span class="field-label">Request Details:</span>
+      //       </div>
+      //       <div style="margin-left: 20px; font-size: 11px; color: var(--shared); background: var(--accent); padding: 10px; border-radius: 4px;">
+      //         <div><strong>URL:</strong> ${samanageResult.requestDetails.url}</div>
+      //         <div><strong>Method:</strong> ${samanageResult.requestDetails.method}</div>
+      //         <div><strong>Timestamp:</strong> ${samanageResult.requestDetails.timestamp}</div>
+      //         <div style="margin-top: 8px;"><strong>Headers:</strong></div>
+      //         ${Object.entries(samanageResult.requestDetails.headers)
+      //           .map(([key, value]) => `<div style="margin-left: 10px;">${key}: ${key.includes('Authorization') ? '[REDACTED]' : value}</div>`)
+      //           .join('')}
+      //       </div>
+      //     `;
+      //   }
 
-        if (samanageResult.responseDetails) {
-          samanageContent += `
-            <div class="user-field" style="margin-top: 10px;">
-              <span class="field-label">Response Details:</span>
-            </div>
-            <div style="margin-left: 20px; font-size: 11px; color: var(--shared); background: var(--accent); padding: 10px; border-radius: 4px;">
-              <div><strong>Status:</strong> ${samanageResult.responseDetails.status} ${samanageResult.responseDetails.statusText}</div>
-              <div><strong>OK:</strong> ${samanageResult.responseDetails.ok}</div>
-              <div><strong>Final URL:</strong> ${samanageResult.responseDetails.url}</div>
-              ${samanageResult.responseDetails.headers && Object.keys(samanageResult.responseDetails.headers).length > 0 ? `
-                <div style="margin-top: 8px;"><strong>Response Headers:</strong></div>
-                ${Object.entries(samanageResult.responseDetails.headers)
-                  .map(([key, value]) => `<div style="margin-left: 10px;">${key}: ${value}</div>`)
-                  .join('')}
-              ` : ''}
-              ${samanageResult.responseDetails.body ? `
-                <div style="margin-top: 8px;"><strong>Response Body:</strong></div>
-                <div style="margin-left: 10px; max-height: 100px; overflow-y: auto; background: #fff; padding: 5px; border-radius: 2px;">${samanageResult.responseDetails.body}</div>
-              ` : ''}
-            </div>
-          `;
-        }
+      //   if (samanageResult.responseDetails) {
+      //     samanageContent += `
+      //       <div class="user-field" style="margin-top: 10px;">
+      //         <span class="field-label">Response Details:</span>
+      //       </div>
+      //       <div style="margin-left: 20px; font-size: 11px; color: var(--shared); background: var(--accent); padding: 10px; border-radius: 4px;">
+      //         <div><strong>Status:</strong> ${samanageResult.responseDetails.status} ${samanageResult.responseDetails.statusText}</div>
+      //         <div><strong>OK:</strong> ${samanageResult.responseDetails.ok}</div>
+      //         <div><strong>Final URL:</strong> ${samanageResult.responseDetails.url}</div>
+      //         ${samanageResult.responseDetails.headers && Object.keys(samanageResult.responseDetails.headers).length > 0 ? `
+      //           <div style="margin-top: 8px;"><strong>Response Headers:</strong></div>
+      //           ${Object.entries(samanageResult.responseDetails.headers)
+      //             .map(([key, value]) => `<div style="margin-left: 10px;">${key}: ${value}</div>`)
+      //             .join('')}
+      //         ` : ''}
+      //         ${samanageResult.responseDetails.body ? `
+      //           <div style="margin-top: 8px;"><strong>Response Body:</strong></div>
+      //           <div style="margin-left: 10px; max-height: 100px; overflow-y: auto; background: #fff; padding: 5px; border-radius: 2px;">${samanageResult.responseDetails.body}</div>
+      //         ` : ''}
+      //       </div>
+      //     `;
+      //   }
 
-        if (samanageResult.exception) {
-          samanageContent += `
-            <div class="user-field" style="margin-top: 10px;">
-              <span class="field-label">Exception Details:</span>
-            </div>
-            <div style="margin-left: 20px; font-size: 11px; color: var(--shared); background: var(--accent); padding: 10px; border-radius: 4px;">
-              <div><strong>Name:</strong> ${samanageResult.exception.name}</div>
-              <div><strong>Message:</strong> ${samanageResult.exception.message}</div>
-            </div>
-          `;
-        }
+      //   if (samanageResult.exception) {
+      //     samanageContent += `
+      //       <div class="user-field" style="margin-top: 10px;">
+      //         <span class="field-label">Exception Details:</span>
+      //       </div>
+      //       <div style="margin-left: 20px; font-size: 11px; color: var(--shared); background: var(--accent); padding: 10px; border-radius: 4px;">
+      //         <div><strong>Name:</strong> ${samanageResult.exception.name}</div>
+      //         <div><strong>Message:</strong> ${samanageResult.exception.message}</div>
+      //       </div>
+      //     `;
+      //   }
 
-        samanageElement.innerHTML = samanageContent;
-      }
+      //   samanageElement.innerHTML = samanageContent;
+      // }
 
       // Create ElevenLabs widget with requester ID
       const widget = document.createElement('elevenlabs-convai');
