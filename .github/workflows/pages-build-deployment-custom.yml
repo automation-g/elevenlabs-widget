@@ -1,7 +1,7 @@
 # This workflow clones the default GitHub Pages build and deployment workflow
 # with added secret injection capabilities
 
-name: pages-build-deployment
+name: pages-build-deployment-custom
 
 on:
   push:
