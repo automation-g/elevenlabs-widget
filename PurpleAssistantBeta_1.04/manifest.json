@@ -1,0 +1,72 @@
+{
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.17/MicrosoftTeams.schema.json",
+    "version": "1.0.4",
+    "manifestVersion": "1.20",
+    "id": "7ee5ff4d-378d-4d43-998a-92dd3a4f7568",
+    "name": {
+        "short": "Purple Assistant - BETA",
+        "full": "GGAIVOICEAGENT"
+    },
+    "developer": {
+        "name": "Gargash Group IT",
+        "mpnId": "",
+        "websiteUrl": "https://automation-g.github.io/elevenlabs-widget/",
+        "privacyUrl": "https://automation-g.github.io/elevenlabs-widget/",
+        "termsOfUseUrl": "https://automation-g.github.io/elevenlabs-widget/"
+    },
+    "description": {
+        "short": "PA - BETA",
+        "full": "THIS IS ONLY A POC FOR THE AI VOICE AGENT"
+    },
+    "icons": {
+        "outline": "outline.png",
+        "color": "color.png"
+    },
+    "accentColor": "#FFFFFF",
+    "staticTabs": [
+        {
+            "entityId": "351bf86f-3c72-4981-bd7a-3e0f027c7e49",
+            "name": "Chat",
+            "contentUrl": "https://automation-g.github.io/elevenlabs-widget/",
+            "websiteUrl": "https://automation-g.github.io/elevenlabs-widget/",
+            "scopes": [
+                "personal"
+            ],
+            "context": [
+                "personalTab"
+            ]
+        },
+        {
+            "entityId": "about",
+            "scopes": [
+                "personal"
+            ]
+        }
+    ],
+    "permissions": [
+    "identity",
+    "messageTeamMembers"
+    ],
+    "devicePermissions": [
+     "media"
+    ],
+    "validDomains": [
+        "automation-g.github.io",
+        "unpkg.com",
+        "api.samanage.com"
+    ],
+    "authorization": {
+        "permissions": {
+            "resourceSpecific": [
+                {
+                    "name": "TeamMember.Read.Group",
+                    "type": "Application"
+                }
+            ]
+        }
+    },
+    "webApplicationInfo": {
+        "id": "728535b8-e587-4579-abc5-3efe5bbe21f5",
+        "resource": "https://automation-g.github.io" 
+    }
+}
