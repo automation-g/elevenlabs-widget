@@ -204,8 +204,8 @@
   <script src="https://res.cdn.office.net/teams-js/2.13.0/js/MicrosoftTeams.min.js"></script>
 
   <script>
-    // Configuration
-    const AGENT_ID = 'agent_4901k3gjds1eexs83j5a7pv4xaaz';
+    // Configuration - Get agent ID from environment variables or build-time replacement
+    const AGENT_ID = window.ENV?.ELEVENLABS_AGENT_ID || '__ELEVENLABS_AGENT_ID__';
 
     // Hide ElevenLabs attribution
     function hideAttribution() {
@@ -270,9 +270,16 @@
 
     // Generate fresh token using client credentials flow
     async function generateFreshToken() {
-      const tenantId = '31c06606-c23c-4881-8914-439ef1a8a645';
-      const clientId = 'd6e0f9db-ede1-47ae-8b48-7ac65aac032a';
-      const clientSecret = 'Buh8Q~YhjtaGADnB6Jt3z.DZCwlIW1SLdtpeCbff';
+      // Get credentials from environment variables or fallback to build-time replacements
+      const tenantId = window.ENV?.AZURE_TENANT_ID || '__AZURE_TENANT_ID__';
+      const clientId = window.ENV?.AZURE_CLIENT_ID || '__AZURE_CLIENT_ID__';
+      const clientSecret = window.ENV?.AZURE_CLIENT_SECRET || '__AZURE_CLIENT_SECRET__';
+
+      // Check if credentials are properly configured
+      if (tenantId.startsWith('__') || clientId.startsWith('__') || clientSecret.startsWith('__')) {
+        console.error('Azure credentials not properly configured. Check environment variables.');
+        return null;
+      }
 
       const tokenUrl = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`;
       const params = new URLSearchParams();
@@ -742,6 +749,14 @@
 
       // Create ElevenLabs widget
       const widget = document.createElement('elevenlabs-convai');
+      
+      // Check if agent ID is properly configured
+      if (AGENT_ID.startsWith('__')) {
+        console.error('ElevenLabs Agent ID not properly configured. Check environment variables.');
+        document.getElementById('widget').innerHTML = '<div style="color: red; padding: 20px; text-align: center;">ElevenLabs Agent ID not configured</div>';
+        return;
+      }
+      
       widget.setAttribute('agent-id', AGENT_ID);
       widget.setAttribute('dynamic-variables', JSON.stringify({ 
         name: userInfo.name, 
